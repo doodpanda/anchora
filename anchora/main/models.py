@@ -1,0 +1,23 @@
+from django.db import models
+
+class Product(models.Model):
+    name = models.CharField(max_length=255)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    discounted_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    description = models.TextField()
+    thumbnail = models.URLField()
+    category = models.CharField(max_length=100)
+    is_featured = models.BooleanField(default=False)
+    is_official_store = models.BooleanField(default=False)
+    is_blacklisted = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # for foreign keys preparation
+    brand_id = models.UUIDField()
+    category_id = models.UUIDField()
+    shop_id = models.UUIDField()
+    seo_keywords_ids = models.JSONField(default=list)
+
+    def __str__(self):
+        return self.name
