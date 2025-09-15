@@ -1,0 +1,140 @@
+{
+  "info": {
+    "_postman_id": "8d4a9a4b-08f0-4a7e-8d9b-2c0c3a2d5071",
+    "name": "Anchora Mall - Data Delivery",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Collection untuk mengakses endpoint data delivery (JSON/XML, by ID)."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "id",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "All Products - JSON",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/json/",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "json",
+            ""
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Content-Type JSON', function () { pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "All Products - XML",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/xml/",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "xml",
+            ""
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Content-Type XML', function () { pm.expect(pm.response.headers.get('Content-Type')).to.include('application/xml'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Product by ID - JSON",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/json/{{id}}/",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "json",
+            "{{id}}",
+            ""
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Content-Type JSON', function () { pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Product by ID - XML",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/xml/{{id}}/",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "xml",
+            "{{id}}",
+            ""
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Content-Type XML', function () { pm.expect(pm.response.headers.get('Content-Type')).to.include('application/xml'); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

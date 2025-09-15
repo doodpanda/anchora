@@ -338,3 +338,61 @@ Dengan fitur-fitur tersebut, Django memberi gambaran yang jelas tentang praktik 
 
 # Apakah ada feedback untuk asisten dosen tutorial 1 yang telah kamu kerjakan sebelumnya?
 Sudah cukup baik.
+
+---
+
+## Data Delivery (Tugas Individu II)
+
+### Mengapa kita memerlukan data delivery dalam pengimplementasian sebuah platform?
+Integrasi melalui API memungkinkan berbagai jenis client—seperti web, aplikasi mobile, maupun layanan pihak ketiga—untuk mengakses data yang sama secara konsisten. Dengan pendekatan ini, terjadi pemisahan concern yang jelas: frontend dan backend dapat dikembangkan serta di-scale secara mandiri sesuai kebutuhan tanpa saling menghambat. Selain itu, penggunaan format standar seperti JSON atau XML mendukung interoperabilitas, sehingga sistem yang berbeda tetap bisa saling berkomunikasi dengan mudah. Dari sisi efisiensi distribusi, data hanya perlu disediakan dari satu sumber, namun dapat dikonsumsi berkali-kali oleh berbagai client tanpa perlu memuat ulang atau merender ulang HTML di server.
+
+### XML vs JSON — mana yang lebih baik? Mengapa JSON lebih populer?
+XML unggul dalam konteks yang membutuhkan skema atau validasi ketat menggunakan XSD, dukungan namespace untuk menghindari konflik penamaan, serta representasi dokumen yang lebih berorientasi pada markup. Sebaliknya, JSON lebih kuat ketika dibutuhkan format yang ringkas, dengan tipe data yang lebih alami bagi bahasa pemrograman modern seperti object dan array, parsing yang cepat, serta ukuran payload yang kecil. Popularitas JSON sendiri didorong oleh ekosistem web dan mobile yang sangat erat kaitannya dengan JavaScript, pengalaman pengembang (developer experience) yang lebih sederhana, serta efisiensi dari sisi bandwidth dan latensi yang lebih rendah dibanding XML.
+
+### Fungsi `is_valid()` pada Django Form dan mengapa dibutuhkan
+- Validasi: menjalankan validator field dan `clean()`/`clean_<field>()` untuk memastikan data sesuai aturan.
+- Normalisasi: mengubah data mentah ke tipe Python yang benar dan mengisi `form.cleaned_data` saat valid.
+- Error handling: mengisi `form.errors` saat invalid sehingga bisa ditampilkan ke pengguna.
+- Keamanan: mencegah data tidak valid/berbahaya tersimpan ke database.
+
+### Mengapa membutuhkan `csrf_token` pada form Django? Apa risikonya jika tidak ada?
+csrf_token pada form Django berfungsi sebagai mekanisme perlindungan terhadap serangan Cross-Site Request Forgery (CSRF). Token ini unik untuk setiap sesi pengguna dan akan diverifikasi server setiap kali ada permintaan POST. Dengan adanya token, server dapat memastikan bahwa request memang berasal dari aplikasi yang sah, bukan dari sumber luar yang berusaha memanipulasi pengguna.
+
+Jika csrf_token tidak digunakan, risiko yang muncul adalah penyerang dapat memanfaatkan sesi login korban untuk mengeksekusi aksi tanpa sepengetahuannya. Misalnya, penyerang membuat sebuah halaman berbahaya yang berisi form tersembunyi dan otomatis melakukan submit ke aplikasi Anda. Ketika korban membuka halaman tersebut dalam keadaan sudah login, aksi seperti perubahan password, transfer data sensitif, atau manipulasi akun dapat terjadi dengan kredensial korban, tanpa ia sadari.
+
+### Implementasi checklist langkah demi langkah (apa yang saya lakukan)
+1. Model: menggunakan `Product` yang sudah ada di `main/models.py`.
+2. Data delivery views: menambah di `main/views.py`:
+     - `show_products_xml`, `show_products_json` (list semua produk)
+     - `show_product_by_id_xml`, `show_product_by_id_json` (filter by `pk`)
+     - Serialisasi menggunakan `django.core.serializers`.
+3. Routing: menambah path di `main/urls.py` untuk endpoint `json/`, `xml/`, `json/<id>/`, `xml/<id>/`.
+4. Form: membuat `main/forms.py` dengan `ProductForm` (ModelForm) dan view `add_product` yang memanggil `form.is_valid()` lalu `form.save()`.
+5. Halaman list dan detail:
+     - `product_list` menampilkan tabel produk + tombol "Add" dan "Detail".
+     - `product_detail` menampilkan informasi lengkap produk.
+     - Template: `main/templates/product_list.html`, `add_product.html`, `product_detail.html` (form menyertakan `{% csrf_token %}`).
+6. Koleksi Postman: menambahkan file `postman/anchora.postman_collection.json` berisi 4 request untuk menguji endpoint data delivery.
+
+### Feedback untuk asdos pada tutorial 2
+- Materi sudah jelas dan runtut, contoh kode tepat sasaran. Bisa ditambahkan tips debugging umum (mis. `urls.py` vs `path` yang tidak nyambung, error CSRF, dan cara melihat `form.errors`) agar pemula lebih cepat menemukan akar masalah.
+
+### Menguji endpoint dengan Postman
+- Import Postman collection: buka Postman → Import → pilih `postman/anchora.postman_collection.json`.
+- Jalankan server:
+    ```bash
+    python3 manage.py runserver
+    ```
+- Sesuaikan variable `baseUrl` jika perlu. Ubah variable `id` ke ID produk yang ada.
+- 4 screenshot hasil request berikut tersimpan ke folder `postman/screenshots/`:
+    - `all-products-json.png` untuk `GET /json/`
+    - `all-products-xml.png` untuk `GET /xml/`
+    - `product-by-id-json.png` untuk `GET /json/<id>/`
+    - `product-by-id-xml.png` untuk `GET /xml/<id>/`
+
+Tempatkan screenshot dengan nama di atas, maka pratinjau di bawah akan muncul:
+
+![All Products JSON](postman/screenshots/all-products-json.png)
+![All Products XML](postman/screenshots/all-products-xml.png)
+![Product by ID JSON](postman/screenshots/product-by-id-json.png)
+![Product by ID XML](postman/screenshots/product-by-id-xml.png)
