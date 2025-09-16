@@ -390,8 +390,6 @@ Jika csrf_token tidak digunakan, risiko yang muncul adalah penyerang dapat meman
     - `product-by-id-json.png` untuk `GET /json/<id>/`
     - `product-by-id-xml.png` untuk `GET /xml/<id>/`
 
-Tempatkan screenshot dengan nama di atas, maka pratinjau di bawah akan muncul:
-
 ![All Products JSON](postman/screenshots/all-products-json.png)
 ![All Products XML](postman/screenshots/all-products-xml.png)
 ![Product by ID JSON](postman/screenshots/product-by-id-json.png)
