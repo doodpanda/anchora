@@ -5,10 +5,12 @@
     <title>Product List</title>
 </head>
 <body>
-    <h1>Product List</h1>
+    <h1>My Products</h1>
+    <p>Hi, {{ request.user.username }}!</p>
     <a href="{% url 'main:add_product' %}"><button>Add Product</button></a>
     <table border="1">
         <tr>
+            <th>Owner</th>
             <th>Name</th>
             <th>Price</th>
             <th>Category</th>
@@ -16,6 +18,7 @@
         </tr>
         {% for product in products %}
         <tr>
+            <td>{{ product.user.username }}</td>
             <td>{{ product.name }}</td>
             <td>{{ product.price }}</td>
             <td>{{ product.category }}</td>
@@ -25,5 +28,6 @@
         </tr>
         {% endfor %}
     </table>
+    <p><a href="{% url 'main:show_main' %}">Back to Home</a></p>
 </body>
 </html>

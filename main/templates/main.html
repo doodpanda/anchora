@@ -10,9 +10,16 @@
     <p>Your one-stop shop for everything!</p>
     <p>Vincentius Filbert Amadeo</p>
     <p>2406351711 - PBP E</p>
-    
-    <a href="/products">
-        <button type="button">Go to Products</button>
-    </a>
+    {% if username %}
+    <p>Logged in as: <strong>{{ username }}</strong></p>
+    {% if last_login %}
+    <p>Last login: {{ last_login }}</p>
+    {% endif %}
+    <a href="{% url 'main:logout' %}"><button type="button">Logout</button></a>
+    <a href="{% url 'main:product_list' %}"><button type="button">Go to My Products</button></a>
+    {% else %}
+    <a href="{% url 'main:login' %}"><button type="button">Login</button></a>
+    <a href="{% url 'main:register' %}"><button type="button">Register</button></a>
+    {% endif %}
 </body>
 </html>
