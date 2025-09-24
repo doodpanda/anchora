@@ -75,8 +75,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "anchora.wsgi.application"
 
+# CSRF Trusted Origins
 CSRF_TRUSTED_ORIGINS = [
-    "https://vincentius-filbert-anchora.pbp.cs.ui.ac.id/"
+    "https://vincentius-filbert-anchora.pbp.cs.ui.ac.id"
 ]
 
 # Database
