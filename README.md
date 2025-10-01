@@ -441,3 +441,132 @@ Dengan kombinasi pengaturan tersebut, ditambah penggunaan HTTPS di lingkungan pr
 4. Template: melengkapi `main/templates/login.html` dan `register.html`; memperbarui `main/templates/main.html` agar menampilkan `username` yang sedang login dan nilai cookie `last_login` serta tombol Login/Register atau Logout.
 5. Data Dummy: membuat 2 user dan 3 data dummy secara manual
 6. Endpoint JSON/XML: memastikan endpoint hanya mengembalikan data milik user yang login; jika belum login, kembalikan data kosong atau unauthorized. 
+
+## CSS and Styling (Tugas Individu 4)
+
+### Urutan Prioritas CSS Selector
+Ketika terdapat beberapa CSS selector untuk suatu elemen HTML, browser menggunakan sistem specificity untuk menentukan style mana yang akan diterapkan. Urutan prioritas dari yang tertinggi ke terendah adalah:
+
+1. **Inline Styles** (style="...") - Specificity: 1000
+2. **IDs** (#myId) - Specificity: 100 
+3. **Classes, Attributes, Pseudo-classes** (.myClass, [type="text"], :hover) - Specificity: 10
+4. **Elements dan Pseudo-elements** (div, p, ::before) - Specificity: 1
+
+Jika terdapat konflik dengan specificity yang sama, maka aturan **!important** akan mengoverride semua aturan lainnya. Namun, jika ada multiple directive !important, kembali ke aturan specificity. Jika specificity benar-benar sama, maka aturan yang **ditulis terakhir** (cascade order) yang akan diterapkan.
+
+Contoh:
+```css
+p { color: blue; }          /* Specificity: 1 */
+.text { color: red; }        /* Specificity: 10 */
+#header { color: green; }   /* Specificity: 100 */
+<p style="color: yellow;">  /* Specificity: 1000 */
+```
+
+### Responsive Design dalam Pengembangan Web
+Responsive design adalah konsep yang memastikan aplikasi web dapat diakses dengan optimal di berbagai ukuran layar dan perangkat. Hal ini krusial mengingat penggunaan internet pada perangkat mobile (termasuk _web platform_) yang terus meningkat.
+
+**Contoh aplikasi yang menerapkan responsive design:**
+- **GitHub** - Layout otomatis menyesuaikan dari desktop ke mobile, navigation berubah menjadi hamburger menu
+- **Google** - Search interface tetap fungsional dan mudah digunakan di semua perangkat
+- **YouTube** - Video player dan layout grid menyesuaikan ukuran layar
+
+**Contoh aplikasi yang belum menerapkan responsive design:**
+- **SIAKNG** - Tidak menerapkan responsive design, tampilan pada mobile sangat sulit dipakai.
+
+**Mengapa penting:**
+- Meningkatkan user experience di semua perangkat
+- SEO - (seperti Google) memberikan ranking lebih tinggi untuk mobile-friendly sites
+- Mengurangi _bounce rate_ karena kemudahan akses
+- Cost-effective dibanding membuat aplikasi terpisah untuk mobile jika ingin memasuki pasar atau target pengguna mobile dan desktop.
+
+### Perbedaan Margin, Border, dan Padding
+Ketiga elemen ini adalah bagian dari CSS Box Model:
+
+1. **Margin** - Ruang di luar border elemen, menciptakan jarak dengan elemen lain
+2. **Border** - Garis yang mengelilingi padding dan content
+3. **Padding** - Jarak ruang di dalam border, antara border dengan content
+
+```css
+/* Implementasi */
+.box {
+    margin: 20px;        /* Jarak 20px dari elemen lain */
+    border: 2px solid red; /* Border merah 2px */
+    padding: 15px;       /* Ruang 15px antara border dan content */
+}
+
+/* Dapat juga diterapkan per sisi */
+.detailed-box {
+    margin-top: 10px;
+    margin-right: 15px;
+    margin-bottom: 10px;
+    margin-left: 15px;
+    
+    border-top: 1px solid blue;
+    border-right: 2px dashed green;
+    
+    padding: 10px 15px; /* vertical horizontal */
+}
+```
+
+### Flexbox dan Grid Layout
+![Ilustrasi Grid dan Flex](https://i0.wp.com/blog.nashtechglobal.com/wp-content/uploads/2023/09/download-1-3.png?fit=1200%2C630&ssl=1)
+
+**Flexbox** adalah layout model satu dimensi (baris atau kolom) yang sangat baik untuk alignment dan distribusi elemen dalam container, responsive navigation bars, centering content, dan equal height columns.
+
+```css
+.flex-container {
+    display: flex;
+    justify-content: space-between; /* Main axis alignment */
+    align-items: center;           /* Cross axis alignment */
+    flex-direction: row;           /* row, column, row-reverse, column-reverse */
+}
+```
+
+**Grid Layout** adalah sistem layout dua dimensi (baris dan kolom) yang ideal untuk complex layout structures, card layouts, magazine-style layouts, dashboard layouts.
+
+```css
+.grid-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr; /* 3 kolom dengan ratio 1:2:1 */
+    grid-gap: 20px;
+    grid-template-areas: 
+        "header header header"
+        "sidebar main aside"
+        "footer footer footer";
+}
+```
+
+### Implementasi Step-by-Step Checklist
+
+1. **Implementasi fungsi hapus dan edit product:**
+   - Membuat view `edit_product` dan `delete_product` di `main/views.py`
+   - Menambahkan URL routing untuk kedua fungsi tersebut
+   - Membuat template `edit_product.html` dan `delete_product.html`
+   - Menambahkan button edit dan hapus di setiap card product
+
+2. **Kustomisasi desain dengan Tailwind CSS:**
+   - Menata ulang modularitas file templates dengan membuat `base.html`
+   - Menggunakan Tailwind CSS framework melalui CDN di `base.html`
+   - Membuat base template yang responsive dengan navigation bar
+   - Mendesain ulang semua halaman: login, register, tambah/edit product, detail product
+   - Mendesain ulang forms dengan menambahkan class tailwind.
+
+3. **Halaman daftar product responsive:**
+   - Menggunakan grid system Tailwind untuk layout card yang responsive
+   - Implementasi kondisi: jika belum ada product, tampilkan pesan belum ada product
+   - Jika ada product, tampilkan dalam bentuk card dengan informasi lengkap
+   - Menambahkan button edit dan hapus di setiap card
+
+4. **Navigation bar responsive:**
+   - Membuat navbar dengan design yang berbeda untuk desktop dan mobile
+   - Menggunakan JavaScript untuk toggle mobile menu
+   - Menambahkan hamburger menu untuk mobile view
+   - Memastikan semua fitur dapat diakses dari navbar
+
+5. **Styling improvements:**
+   - Menggunakan custom color palette, sebagai pengarah tata visual pada web project ini.
+   - Menambahkan hover effects dan transitions
+   - Implementasi badges untuk featured products dan official stores
+   - Menggunakan responsive typography dan spacing
+
+Seluruh implementasi menggunakan mobile-first approach dengan Tailwind CSS, sehingga aplikasi dipastikan dapat digunakan optimal di semua ukuran perangkat.

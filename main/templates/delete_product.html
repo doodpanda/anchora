@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete {{ product.name }} - Anchora Mall{% endblock %}
+
+{% block content %}
+    <div class="max-w-lg mx-auto">
+        <div class="bg-red-50 bg-opacity-70 border border-red-200 border-opacity-70 rounded-lg p-6 shadow-sm">
+            <div class="flex items-center mb-4">
+                <div class="flex-shrink-0">
+                    <svg class="h-8 w-8 text-red-400 text-opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h2 class="text-lg font-medium text-red-900 text-opacity-90">Delete Product</h2>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <p class="text-red-800 text-opacity-90 mb-4">
+                    Are you sure you want to delete "<strong>{{ product.name }}</strong>"? 
+                </p>
+                <p class="text-red-700 text-opacity-80 text-sm">
+                    This action cannot be undone. The product will be permanently removed from your listings.
+                </p>
+            </div>
+            
+            <div class="bg-white bg-opacity-90 rounded-md p-4 mb-6 border border-ash_gray-300">
+                <h3 class="font-medium text-ash_gray-100 mb-2">Product Details:</h3>
+                <div class="text-sm text-ash_gray-600 space-y-1">
+                    <div><strong>Name:</strong> {{ product.name }}</div>
+                    <div><strong>Price:</strong> ${{ product.price }}</div>
+                    <div><strong>Category:</strong> {{ product.category }}</div>
+                    <div><strong>Created:</strong> {{ product.created_at|date:"M d, Y" }}</div>
+                </div>
+            </div>
+            
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                <div class="flex space-x-4">
+                    <button type="submit" class="flex-1 bg-red-600 bg-opacity-80 hover:bg-red-600 hover:bg-opacity-90 text-white px-4 py-3 rounded-md transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
+                        Yes, Delete Product
+                    </button>
+                    <a href="{% url 'main:product_detail' product.id %}" class="flex-1 bg-ash_gray-600 hover:bg-ash_gray-700 text-white px-4 py-3 rounded-md transition-colors duration-200 font-medium text-center">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

@@ -1,17 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Register</title>
-</head>
-<body>
-	<h1>Register</h1>
-	<form method="post">
-		{% csrf_token %}
-		{{ form.as_p }}
-		<button type="submit">Create Account</button>
-	</form>
-	<p>Already have an account? <a href="{% url 'main:login' %}">Login</a></p>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Register - Anchora Mall{% endblock %}
+
+{% block content %}
+    <div class="max-w-md mx-auto">
+        <div class="bg-white border border-ash_gray-300 rounded-lg p-6 shadow-sm">
+            <h2 class="text-2xl font-bold text-ash_gray-100 mb-6 text-center">Create New Account</h2>
+            
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                {% for field in form %}
+                    <div>
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-ash_gray-300 mb-2">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div class="mt-1 text-sm text-red-600 text-opacity-80">
+                                {{ field.errors.0 }}
+                            </div>
+                        {% endif %}
+                        {% if field.help_text %}
+                            <div class="mt-1 text-xs text-ash_gray-500">
+                                {{ field.help_text }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                
+                <button type="submit" class="w-full bg-shamrock_green hover:bg-shamrock_green-600 text-white py-3 px-4 rounded-md font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-shamrock_green-500">
+                    Create Account
+                </button>
+            </form>
+            
+            <div class="mt-6 text-center">
+                <p class="text-ash_gray-600">
+                    Already have an account? 
+                    <a href="{% url 'main:login' %}" class="text-cambridge_blue hover:text-cambridge_blue-600 font-medium transition-colors duration-200">
+                        Login here
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

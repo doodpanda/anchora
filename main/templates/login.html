@@ -1,18 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Login</title>
-	{% load static %}
-</head>
-<body>
-	<h1>Login</h1>
-	<form method="post">
-		{% csrf_token %}
-		{{ form.as_p }}
-		<button type="submit">Login</button>
-	</form>
-	<p>Don't have an account? <a href="{% url 'main:register' %}">Register</a></p>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Login - Anchora Mall{% endblock %}
+
+{% block content %}
+    <div class="max-w-md mx-auto">
+        <h2 class="text-2xl font-bold text-ash_gray-100 mb-6 text-center">Login</h2>
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            {% for field in form %}
+                <div>
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-ash_gray-300 mb-1">
+                        {{ field.label }}
+                    </label>
+                    {{ field }}
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <p class="mt-1 text-sm text-red-600 text-opacity-80">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="w-full bg-shamrock_green hover:bg-shamrock_green-600 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-shamrock_green-500">
+                Login
+            </button>
+        </form>
+        <p class="mt-4 text-center text-sm text-ash_gray-600">
+            Don't have an account? 
+            <a href="{% url 'main:register' %}" class="text-cambridge_blue hover:text-cambridge_blue-600 font-medium transition-colors duration-200">Register here</a>
+        </p>
+    </div>
+{% endblock %}

@@ -1,16 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Add Product</title>
-</head>
-<body>
-    <h1>Add Product</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Submit</button>
-    </form>
-    <a href="{% url 'main:product_list' %}">Back to Product List</a>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Add Product - Anchora Mall{% endblock %}
+
+{% block content %}
+    <div class="max-w-lg mx-auto">
+        <div class="bg-white border border-ash_gray-300 rounded-lg p-6 shadow-sm">
+            <h2 class="text-2xl font-bold text-ash_gray-100 mb-6">Add New Product</h2>
+            
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                {% for field in form %}
+                    <div>
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-ash_gray-300 mb-2">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div class="mt-1 text-sm text-red-600 text-opacity-80">
+                                {{ field.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                
+                <div class="flex space-x-4">
+                    <button type="submit" class="flex-1 bg-shamrock_green hover:bg-shamrock_green-600 text-white py-3 px-4 rounded-md font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-shamrock_green-500">
+                        Add Product
+                    </button>
+                    <a href="{% url 'main:show_main' %}" class="flex-1 bg-ash_gray-600 hover:bg-ash_gray-700 text-white py-3 px-4 rounded-md font-medium transition-colors duration-200 text-center">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
