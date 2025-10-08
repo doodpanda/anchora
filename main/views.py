@@ -178,12 +178,14 @@ from django.views.decorators.http import require_POST, require_http_methods
 import json
 
 def get_products_json(request):
-    if request.path == '/json/':
-        products = Product.objects.filter(is_blacklisted=False)
-    elif request.user.is_authenticated:
+    source = request.GET.get('source', 'main')
+    
+    if source == 'my_products' and request.user.is_authenticated:
         products = Product.objects.filter(user=request.user)
+    elif request.path == '/json/':
+        products = Product.objects.filter(is_blacklisted=False)
     else:
-        products = Product.objects.none()
+        products = Product.objects.filter(is_blacklisted=False)
     
     data = []
     for product in products:
