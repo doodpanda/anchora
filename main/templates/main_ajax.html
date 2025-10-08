@@ -1,0 +1,405 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Anchora Mall{% endblock %}
+
+{% block content %}
+    <div class="mb-8 flex justify-between items-center">
+        <div>
+            <h2 class="text-3xl font-bold text-ash_gray-100 mb-2">Welcome to Anchora Mall</h2>
+            <p class="text-ash_gray-300">Your one-stop shop for everything!</p>
+        </div>
+        <div class="flex gap-2">
+            {% if user.is_authenticated %}
+            <button onclick="openAddProductModal()" class="bg-shamrock_green hover:bg-shamrock_green-600 text-white px-4 py-2 rounded-md transition-colors duration-200 font-medium inline-flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Add Product
+            </button>
+            {% endif %}
+            <button onclick="refreshProducts()" class="bg-cambridge_blue hover:bg-cambridge_blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200 font-medium inline-flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                Refresh
+            </button>
+        </div>
+    </div>
+    
+    <!-- Loading State -->
+    <div id="loading-state" class="text-center py-12 hidden">
+        <div class="spinner mx-auto mb-4"></div>
+        <p class="text-ash_gray-300">Loading products...</p>
+    </div>
+    
+    <!-- Error State -->
+    <div id="error-state" class="text-center py-12 hidden">
+        <svg class="w-16 h-16 text-red-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p class="text-ash_gray-300 text-lg mb-2">Error loading products</p>
+        <button onclick="refreshProducts()" class="bg-shamrock_green hover:bg-shamrock_green-600 text-white px-4 py-2 rounded-md transition-colors duration-200 font-medium">
+            Try Again
+        </button>
+    </div>
+    
+    <!-- Empty State -->
+    <div id="empty-state" class="text-center py-12 hidden">
+        <div class="flex flex-col items-center">
+            <svg class="w-24 h-24 text-ash_gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M9 9h.01M15 9h.01" />
+            </svg>
+            <div class="text-ash_gray-300 text-lg mb-4">No products available yet.</div>
+            {% if user.is_authenticated %}
+            <button onclick="openAddProductModal()" class="bg-shamrock_green hover:bg-shamrock_green-600 text-white px-6 py-3 rounded-md transition-colors duration-200 font-medium">
+                Add Your First Product
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Products Grid -->
+    <div id="products-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <!-- Products will be loaded here via AJAX -->
+    </div>
+
+    <!-- Add/Edit Product Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 id="modalTitle" class="text-2xl font-bold text-ash_gray-100">Add New Product</h3>
+                    <button onclick="closeModal('productModal')" class="text-ash_gray-400 hover:text-ash_gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <form id="productForm" class="space-y-4">
+                    <input type="hidden" id="productId" value="">
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-ash_gray-300 mb-2">Product Name *</label>
+                        <input type="text" id="productName" required class="w-full px-3 py-2 border border-ash_gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-shamrock_green">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-ash_gray-300 mb-2">Price *</label>
+                            <input type="number" id="productPrice" step="0.01" required class="w-full px-3 py-2 border border-ash_gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-shamrock_green">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-ash_gray-300 mb-2">Discounted Price</label>
+                            <input type="number" id="productDiscountedPrice" step="0.01" class="w-full px-3 py-2 border border-ash_gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-shamrock_green">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-ash_gray-300 mb-2">Description *</label>
+                        <textarea id="productDescription" rows="4" required class="w-full px-3 py-2 border border-ash_gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-shamrock_green resize-vertical"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-ash_gray-300 mb-2">Category *</label>
+                        <input type="text" id="productCategory" required class="w-full px-3 py-2 border border-ash_gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-shamrock_green">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-ash_gray-300 mb-2">Thumbnail URL</label>
+                        <input type="url" id="productThumbnail" class="w-full px-3 py-2 border border-ash_gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-shamrock_green">
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="productFeatured" class="rounded border-ash_gray-300 text-shamrock_green focus:ring-shamrock_green mr-2">
+                            <span class="text-sm text-ash_gray-300">Featured</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="productOfficialStore" class="rounded border-ash_gray-300 text-shamrock_green focus:ring-shamrock_green mr-2">
+                            <span class="text-sm text-ash_gray-300">Official Store</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="productBlacklisted" class="rounded border-ash_gray-300 text-red-600 focus:ring-red-500 mr-2">
+                            <span class="text-sm text-ash_gray-300">Blacklisted</span>
+                        </label>
+                    </div>
+                    
+                    <div class="flex gap-4 pt-4">
+                        <button type="submit" class="flex-1 bg-shamrock_green hover:bg-shamrock_green-600 text-white py-3 px-4 rounded-md font-medium transition-colors duration-200">
+                            Save Product
+                        </button>
+                        <button type="button" onclick="closeModal('productModal')" class="flex-1 bg-ash_gray-600 hover:bg-ash_gray-700 text-white py-3 px-4 rounded-md font-medium transition-colors duration-200">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content max-w-md">
+            <div class="p-6">
+                <div class="text-center mb-6">
+                    <svg class="w-16 h-16 text-brown_sugar mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-1.963-1.333-2.732 0L3.082 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                    <h3 class="text-xl font-bold text-ash_gray-100 mb-2">Delete Product?</h3>
+                    <p class="text-ash_gray-300">Are you sure you want to delete "<span id="deleteProductName" class="font-semibold"></span>"?</p>
+                    <p class="text-sm text-brown_sugar mt-2 font-medium">This action cannot be undone.</p>
+                </div>
+                
+                <div class="flex gap-4">
+                    <button onclick="confirmDelete()" class="flex-1 bg-brown_sugar hover:bg-brown_sugar-600 text-white py-3 px-4 rounded-md font-medium transition-colors duration-200">
+                        Yes, Delete
+                    </button>
+                    <button onclick="closeModal('deleteModal')" class="flex-1 bg-ash_gray-600 hover:bg-ash_gray-700 text-white py-3 px-4 rounded-md font-medium transition-colors duration-200">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let deleteProductId = null;
+    
+    // Load products on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        refreshProducts();
+    });
+    
+    // Refresh products
+    async function refreshProducts() {
+        showLoading();
+        
+        try {
+            const response = await fetch('/api/products/');
+            if (!response.ok) throw new Error('Failed to load products');
+            
+            const products = await response.json();
+            displayProducts(products);
+        } catch (error) {
+            showError();
+            console.error('Error loading products:', error);
+        }
+    }
+    
+    // Display products
+    function displayProducts(products) {
+        const container = document.getElementById('products-container');
+        const loading = document.getElementById('loading-state');
+        const empty = document.getElementById('empty-state');
+        const error = document.getElementById('error-state');
+        
+        loading.classList.add('hidden');
+        error.classList.add('hidden');
+        
+        if (products.length === 0) {
+            container.innerHTML = '';
+            container.classList.add('hidden');
+            empty.classList.remove('hidden');
+            return;
+        }
+        
+        empty.classList.add('hidden');
+        container.classList.remove('hidden');
+        
+        container.innerHTML = products.map(product => `
+            <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-ash_gray-300">
+                <!-- Product Image -->
+                <div class="h-48 bg-ash_gray-700 relative">
+                    ${product.thumbnail ? 
+                        `<img src="${product.thumbnail}" alt="${product.name}" class="w-full h-full object-cover">` :
+                        `<div class="w-full h-full flex items-center justify-center text-ash_gray-400">
+                            <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>`
+                    }
+                    
+                    ${product.is_featured ? `
+                    <div class="absolute top-2 right-2">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-yellow-400 to-yellow-600 text-yellow-900 shadow-md">
+                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            Featured
+                        </span>
+                    </div>
+                    ` : ''}
+                    
+                    ${product.is_official_store ? `
+                    <div class="absolute top-2 left-2">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-shamrock_green-700 text-shamrock_green-100 shadow-md">
+                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                            Official Store
+                        </span>
+                    </div>
+                    ` : ''}
+                </div>
+                
+                <!-- Product Info -->
+                <div class="p-4">
+                    <div class="mb-2">
+                        <p class="text-sm text-ash_gray-400">by ${product.user}</p>
+                    </div>
+                    <h3 class="font-semibold text-ash_gray-100 text-lg mb-2 line-clamp-2">${product.name}</h3>
+                    
+                    <div class="mb-3">
+                        ${product.discounted_price ? `
+                            <div class="flex items-center space-x-2 flex-wrap gap-2">
+                                <span class="text-xl font-bold text-brown_sugar">$${product.discounted_price}</span>
+                                <span class="text-sm text-ash_gray-400 line-through">$${product.price}</span>
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-800 border border-orange-300">
+                                    -${Math.round((1 - product.discounted_price / product.price) * 100)}%
+                                </span>
+                            </div>
+                        ` : `
+                            <p class="text-xl font-bold text-shamrock_green">$${product.price}</p>
+                        `}
+                    </div>
+                    
+                    <p class="text-ash_gray-300 text-sm mb-4">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-cambridge_blue-700 text-cambridge_blue-100">
+                            ${product.category}
+                        </span>
+                    </p>
+                    
+                    ${product.description ? `
+                        <p class="text-ash_gray-300 text-sm mb-4 line-clamp-3">${product.description}</p>
+                    ` : ''}
+                    
+                    <!-- Action Button -->
+                    <a href="/products/${product.id}/" class="w-full bg-pine_green hover:bg-pine_green-600 text-white px-4 py-2 rounded-md transition-colors duration-200 text-sm font-medium inline-flex items-center justify-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        View Details
+                    </a>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    // Show loading state
+    function showLoading() {
+        document.getElementById('loading-state').classList.remove('hidden');
+        document.getElementById('products-container').classList.add('hidden');
+        document.getElementById('empty-state').classList.add('hidden');
+        document.getElementById('error-state').classList.add('hidden');
+    }
+    
+    // Show error state
+    function showError() {
+        document.getElementById('loading-state').classList.add('hidden');
+        document.getElementById('products-container').classList.add('hidden');
+        document.getElementById('empty-state').classList.add('hidden');
+        document.getElementById('error-state').classList.remove('hidden');
+    }
+    
+    // Open add product modal
+    function openAddProductModal() {
+        document.getElementById('modalTitle').textContent = 'Add New Product';
+        document.getElementById('productForm').reset();
+        document.getElementById('productId').value = '';
+        openModal('productModal');
+    }
+    
+    // Open edit product modal
+    function openEditProductModal(productId) {
+        // This function will be used in product_list page
+        document.getElementById('modalTitle').textContent = 'Edit Product';
+        // Load product data and fill form
+        // Implementation will be in product_list_ajax.html
+        openModal('productModal');
+    }
+    
+    // Handle form submission
+    document.getElementById('productForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const productId = document.getElementById('productId').value;
+        const isEdit = productId !== '';
+        
+        const data = {
+            name: document.getElementById('productName').value,
+            price: document.getElementById('productPrice').value,
+            discounted_price: document.getElementById('productDiscountedPrice').value || null,
+            description: document.getElementById('productDescription').value,
+            category: document.getElementById('productCategory').value,
+            thumbnail: document.getElementById('productThumbnail').value || '',
+            is_featured: document.getElementById('productFeatured').checked,
+            is_official_store: document.getElementById('productOfficialStore').checked,
+            is_blacklisted: document.getElementById('productBlacklisted').checked,
+        };
+        
+        try {
+            const url = isEdit ? `/api/products/${productId}/update/` : '/api/products/create/';
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                showToast(result.message, 'success');
+                closeModal('productModal');
+                refreshProducts();
+            } else {
+                showToast(result.message || 'An error occurred', 'error');
+            }
+        } catch (error) {
+            showToast('An error occurred while saving the product', 'error');
+            console.error('Error:', error);
+        }
+    });
+    
+    // Open delete modal
+    function openDeleteModal(productId, productName) {
+        deleteProductId = productId;
+        document.getElementById('deleteProductName').textContent = productName;
+        openModal('deleteModal');
+    }
+    
+    // Confirm delete
+    async function confirmDelete() {
+        if (!deleteProductId) return;
+        
+        try {
+            const response = await fetch(`/api/products/${deleteProductId}/delete/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                showToast(result.message, 'success');
+                closeModal('deleteModal');
+                refreshProducts();
+            } else {
+                showToast(result.message || 'An error occurred', 'error');
+            }
+        } catch (error) {
+            showToast('An error occurred while deleting the product', 'error');
+            console.error('Error:', error);
+        }
+    }
+</script>
+{% endblock %}

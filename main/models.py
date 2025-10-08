@@ -17,10 +17,10 @@ class Product(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     # for foreign keys preparation
-    brand_id = models.UUIDField()
-    category_id = models.UUIDField()
-    shop_id = models.UUIDField()
-    seo_keywords_ids = models.JSONField(default=list)
+    brand_id = models.UUIDField(null=True, blank=True)
+    category_id = models.UUIDField(null=True, blank=True)
+    shop_id = models.UUIDField(null=True, blank=True)
+    seo_keywords_ids = models.JSONField(default=list, blank=True, null=True)
 
     def __str__(self):
         return self.name

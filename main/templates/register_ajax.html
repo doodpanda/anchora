@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - Anchora Mall{% endblock %}
+
+{% block content %}
+    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+            <!-- Logo/Header -->
+            <div class="text-center">
+                <h2 class="mt-6 text-4xl font-extrabold text-ash_gray-100">
+                    Anchora Mall
+                </h2>
+                <p class="mt-2 text-sm text-ash_gray-300">
+                    Create your account
+                </p>
+            </div>
+            
+            <!-- Registration Form -->
+            <div class="bg-white rounded-lg shadow-xl p-8">
+                <form id="registerForm" class="space-y-6">
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-ash_gray-700 mb-2">
+                            Username *
+                        </label>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            required 
+                            autocomplete="username"
+                            class="w-full px-4 py-3 border border-ash_gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-shamrock_green focus:border-transparent"
+                            placeholder="Choose a username"
+                        >
+                        <p class="mt-1 text-xs text-ash_gray-500">
+                            Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.
+                        </p>
+                    </div>
+                    
+                    <div>
+                        <label for="password1" class="block text-sm font-medium text-ash_gray-700 mb-2">
+                            Password *
+                        </label>
+                        <input 
+                            type="password" 
+                            id="password1" 
+                            name="password1" 
+                            required 
+                            autocomplete="new-password"
+                            class="w-full px-4 py-3 border border-ash_gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-shamrock_green focus:border-transparent"
+                            placeholder="Create a password"
+                        >
+                        <p class="mt-1 text-xs text-ash_gray-500">
+                            Your password must contain at least 8 characters and can't be entirely numeric.
+                        </p>
+                    </div>
+                    
+                    <div>
+                        <label for="password2" class="block text-sm font-medium text-ash_gray-700 mb-2">
+                            Confirm Password *
+                        </label>
+                        <input 
+                            type="password" 
+                            id="password2" 
+                            name="password2" 
+                            required 
+                            autocomplete="new-password"
+                            class="w-full px-4 py-3 border border-ash_gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-shamrock_green focus:border-transparent"
+                            placeholder="Confirm your password"
+                        >
+                        <p class="mt-1 text-xs text-ash_gray-500">
+                            Enter the same password as before, for verification.
+                        </p>
+                    </div>
+                    
+                    <!-- Error Messages Display -->
+                    <div id="errorMessages" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+                        <ul id="errorList" class="list-disc list-inside space-y-1">
+                            <!-- Error messages will be displayed here -->
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <button 
+                            type="submit" 
+                            id="registerButton"
+                            class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-shamrock_green hover:bg-shamrock_green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-shamrock_green transition-all duration-200"
+                        >
+                            <span id="registerButtonText">Create Account</span>
+                            <svg id="registerSpinner" class="hidden animate-spin ml-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="mt-6">
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-ash_gray-300"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-2 bg-white text-ash_gray-500">
+                                Already have an account?
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <a href="/login/" 
+                           class="w-full flex justify-center py-3 px-4 border border-shamrock_green rounded-md shadow-sm text-sm font-medium text-shamrock_green bg-white hover:bg-shamrock_green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-shamrock_green transition-all duration-200">
+                            Sign in instead
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Back to Home Link -->
+            <div class="text-center">
+                <a href="/" class="text-sm text-cambridge_blue hover:text-cambridge_blue-600 transition-colors duration-200">
+                    <svg class="inline-block w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Get form data
+        const username = document.getElementById('username').value;
+        const password1 = document.getElementById('password1').value;
+        const password2 = document.getElementById('password2').value;
+        
+        // UI elements
+        const registerButton = document.getElementById('registerButton');
+        const registerButtonText = document.getElementById('registerButtonText');
+        const registerSpinner = document.getElementById('registerSpinner');
+        const errorMessages = document.getElementById('errorMessages');
+        const errorList = document.getElementById('errorList');
+        
+        // Disable button and show loading state
+        registerButton.disabled = true;
+        registerButtonText.textContent = 'Creating account...';
+        registerSpinner.classList.remove('hidden');
+        errorMessages.classList.add('hidden');
+        errorList.innerHTML = '';
+        
+        try {
+            const response = await fetch('/api/register/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password1: password1,
+                    password2: password2
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                // Success - show toast and redirect
+                showToast(data.message, 'success');
+                
+                // Clear the form
+                document.getElementById('registerForm').reset();
+                
+                // Wait a moment for the toast to be visible, then redirect
+                setTimeout(() => {
+                    window.location.href = data.redirect || '/login/';
+                }, 1500);
+            } else {
+                // Error - show error messages
+                if (data.errors) {
+                    // Display field-specific errors
+                    const errors = [];
+                    for (const field in data.errors) {
+                        if (Array.isArray(data.errors[field])) {
+                            errors.push(...data.errors[field]);
+                        } else {
+                            errors.push(data.errors[field]);
+                        }
+                    }
+                    
+                    errorList.innerHTML = errors.map(error => `<li>${error}</li>`).join('');
+                    errorMessages.classList.remove('hidden');
+                    
+                    // Show first error in toast
+                    showToast(errors[0], 'error');
+                } else {
+                    // Generic error message
+                    const message = data.message || 'Registration failed. Please check your inputs.';
+                    errorList.innerHTML = `<li>${message}</li>`;
+                    errorMessages.classList.remove('hidden');
+                    showToast(message, 'error');
+                }
+                
+                // Re-enable button
+                registerButton.disabled = false;
+                registerButtonText.textContent = 'Create Account';
+                registerSpinner.classList.add('hidden');
+            }
+        } catch (error) {
+            console.error('Registration error:', error);
+            const message = 'An error occurred. Please try again.';
+            errorList.innerHTML = `<li>${message}</li>`;
+            errorMessages.classList.remove('hidden');
+            
+            // Re-enable button
+            registerButton.disabled = false;
+            registerButtonText.textContent = 'Create Account';
+            registerSpinner.classList.add('hidden');
+            
+            showToast(message, 'error');
+        }
+    });
+    
+    // Clear error messages when user starts typing
+    ['username', 'password1', 'password2'].forEach(fieldId => {
+        document.getElementById(fieldId).addEventListener('input', function() {
+            document.getElementById('errorMessages').classList.add('hidden');
+        });
+    });
+    
+    // Real-time password match validation
+    document.getElementById('password2').addEventListener('input', function() {
+        const password1 = document.getElementById('password1').value;
+        const password2 = this.value;
+        
+        if (password2 && password1 !== password2) {
+            this.setCustomValidity('Passwords do not match');
+            this.classList.add('border-red-500');
+        } else {
+            this.setCustomValidity('');
+            this.classList.remove('border-red-500');
+        }
+    });
+</script>
+{% endblock %}

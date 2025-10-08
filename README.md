@@ -554,7 +554,7 @@ Ketiga elemen ini adalah bagian dari CSS Box Model:
 3. **Halaman daftar product responsive:**
    - Menggunakan grid system Tailwind untuk layout card yang responsive
    - Implementasi kondisi: jika belum ada product, tampilkan pesan belum ada product
-   - Jika ada product, tampilkan dalam bentuk card dengan informasi lengkap
+   - Jika ada product, tampilkan dalam bentuk card
    - Menambahkan button edit dan hapus di setiap card
 
 4. **Navigation bar responsive:**
@@ -570,3 +570,292 @@ Ketiga elemen ini adalah bagian dari CSS Box Model:
    - Menggunakan responsive typography dan spacing
 
 Seluruh implementasi menggunakan mobile-first approach dengan Tailwind CSS, sehingga aplikasi dipastikan dapat digunakan optimal di semua ukuran perangkat.
+
+---
+
+## AJAX Implementation (Tugas Individu V)
+
+### Perbedaan antara Synchronous Request dan Asynchronous Request
+
+**Synchronous Request (Sinkron):**
+- Eksekusi kode berjalan secara berurutan (blocking)
+- Browser menunggu response sebelum melanjutkan ke operasi berikutnya
+- Halaman web akan "freeze" atau tidak responsif selama menunggu
+- User tidak dapat berinteraksi dengan elemen lain di halaman
+- Contoh: form submit tradisional yang menyebabkan page reload
+
+**Asynchronous Request (Asinkron):**
+- Eksekusi kode berjalan secara bersamaan (non-blocking)
+- Browser dapat melanjutkan operasi lain tanpa menunggu response
+- Halaman tetap responsif dan user dapat berinteraksi dengan elemen lain
+- Response ditangani melalui callback, promise, atau async/await
+- Contoh: AJAX request yang mengupdate data tanpa page reload
+
+```javascript
+// Synchronous (blocking)
+function syncRequest() {
+    // Browser akan menunggu sampai selesai
+    let response = fetch('/api/data').then(r => r.json());
+    console.log("Blok kode ini akan dijalankan setelah request selesai");
+}
+
+// Asynchronous (non-blocking)
+async function asyncRequest() {
+    // Browser tidak menunggu, langsung lanjut
+    fetch('/api/data').then(data => {
+        console.log("Response diterima:", data);
+    });
+    console.log("Blok kode ini akan dijalankan langsung tanpa menunggu");
+}
+```
+
+### Bagaimana AJAX Bekerja di Django (Alur Request–Response)
+
+Alur AJAX di Django mengikuti pola berikut:
+
+```mermaid
+sequenceDiagram
+    participant Browser
+    participant JavaScript
+    participant Django View
+    participant Database
+    participant JSON Response
+
+    Browser->>JavaScript: User interaction (click, submit, etc.)
+    JavaScript->>Django View: XMLHttpRequest/Fetch API
+    Django View->>Database: Query/Update data
+    Database-->>Django View: Return data
+    Django View->>JSON Response: Serialize data (JSON/XML)
+    JSON Response-->>JavaScript: Response data
+    JavaScript->>Browser: Update DOM dynamically
+```
+
+**Implementasi di Django:**
+
+1. **Frontend (JavaScript):**
+```javascript
+async function loadProducts() {
+    try {
+        const response = await fetch('/api/products/');
+        const products = await response.json();
+        updateProductList(products);
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+```
+
+2. **Backend (Django Views):**
+```python
+from django.http import JsonResponse
+
+def get_products_json(request):
+    products = Product.objects.filter(user=request.user)
+    data = []
+    for product in products:
+        data.append({
+            'id': product.id,
+            'name': product.name,
+            'price': str(product.price),
+        })
+    return JsonResponse(data, safe=False)
+```
+
+3. **URL Routing:**
+```python
+urlpatterns = [
+    path('api/products/', get_products_json, name='get_products_json'),
+]
+```
+
+### Keuntungan Menggunakan AJAX Dibandingkan Render Biasa di Django
+
+**AJAX Advantages:**
+1. Tidak ada page reload, interaksi lebih smooth dan cepat
+2. Hanya data yang dibutuhkan yang dikirim, bukan seluruh halaman HTML
+3. Aplikasi terasa lebih seperti desktop/mobile app
+4. Dapat mengupdate bagian tertentu halaman tanpa memuat ulang semua bagian
+5. Operasi dapat berjalan di background tanpa mengganggu user
+6. Mudah implementasi fitur real-time seperti live chat, notifications
+
+**Contoh perbandingan:**
+```python
+# Traditional Django View
+def product_list(request):
+    products = Product.objects.filter(user=request.user)
+    return render(request, 'product_list.html', {'products': products})
+    # Full page reload, 50KB HTML response
+
+# AJAX Django View  
+def product_list_ajax(request):
+    products = Product.objects.filter(user=request.user)
+    data = [{'id': p.id, 'name': p.name} for p in products]
+    return JsonResponse(data, safe=False)
+    # No page reload, 2KB JSON response
+```
+
+### Cara Memastikan Keamanan saat Menggunakan AJAX untuk Login dan Register
+
+**1. CSRF Protection:**
+```javascript
+// Ambil CSRF token dari cookie
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Sertakan dalam setiap AJAX request (mencegah CSRF attack)
+fetch('/api/login/', {
+    method: 'POST',
+    headers: {
+        'X-CSRFToken': getCookie('csrftoken'),
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(formData)
+})
+```
+
+**2. Input Validation & Sanitization:**
+```python
+@require_POST
+def login_ajax(request):
+    try:
+        data = json.loads(request.body)
+        username = data.get('username', '').strip()
+        password = data.get('password', '')
+        
+        # Validasi input
+        if not username or not password:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Username and password required'
+            }, status=400)
+            
+        # Autentikasi
+        user = authenticate(username=username, password=password)
+        if user and user.is_active:
+            login(request, user)
+            return JsonResponse({'status': 'success'})
+        else:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Invalid credentials'
+            }, status=401)
+            
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Invalid JSON'
+        }, status=400)
+```
+
+**3. Rate Limiting & Security Headers:**
+```python
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_headers
+
+@require_POST
+@vary_on_headers('X-Requested-With')
+def login_ajax(request):
+    # Implementasi rate limiting, cek IP Address, UA, dll.
+    if not request.is_ajax():
+        return JsonResponse({'error': 'AJAX required'}, status=400)
+```
+
+**4. HTTPS & Secure Cookies:**
+```python
+# settings.py
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+```
+
+**5. Content Type Validation:**
+```javascript
+fetch('/api/login/', options)
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            throw new TypeError("Response bukan JSON!");
+        }
+        return response.json();
+    })
+```
+
+### Bagaimana AJAX Mempengaruhi User Experience pada Website
+
+1. **Improved Responsiveness:**
+   - Eliminasi loading time untuk full page reload
+   - Instant feedback untuk user actions
+   - Smooth transitions dan animations
+
+2. **Better Interactivity:**
+   - Real-time search suggestions
+   - Live form validation
+   - Dynamic content loading (infinite scroll)
+   - Instant notifications
+
+3. **Enhanced Performance:**
+   - Reduced server load (smaller payloads)
+   - Faster perceived performance
+   - Background data synchronization
+
+4. **Mobile-Friendly:**
+   - Konsumsi bandwidth lebih efisien
+   - Battery saving (less full page rendering)
+   - Touch-friendly interactions
+
+**Practical Examples:**
+
+```javascript
+// Search dengan live suggestions
+function liveSearch(query) {
+    if (query.length > 2) {
+        fetch(`/api/search/?q=${query}`)
+            .then(response => response.json())
+            .then(results => {
+                displaySuggestions(results);
+            });
+    }
+}
+
+// Form validation real-time
+function validateField(field, value) {
+    fetch('/api/validate/', {
+        method: 'POST',
+        body: JSON.stringify({field: field, value: value})
+    })
+    .then(response => response.json())
+    .then(result => {
+        showValidationMessage(field, result);
+    });
+}
+
+// Toast notifications
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.remove(), 3000);
+}
+```
+
+**Possible Improvements dalam Implementasi AJAX:**
+
+1. **Loading States:** Menampilkan spinner atau skeleton loading
+2. **Error Handling:** Graceful error messages tanpa mengganggu workflow, berupa toast atau pop-up
+3. **Accessibility:** Proper ARIA labels dan keyboard navigation
+4. **Offline Support:** Service workers untuk caching dan offline functionality
