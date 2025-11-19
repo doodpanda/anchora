@@ -178,13 +178,21 @@ from django.views.decorators.http import require_POST, require_http_methods
 import json
 
 def get_products_json(request):
+    """
+    API endpoint to get products as JSON.
+    Returns only user's own products if authenticated and source='my_products',
+    otherwise returns all non-blacklisted products.
+    """
     source = request.GET.get('source', 'main')
     
+    # Filter to show only user's products when authenticated and requesting 'my_products'
     if source == 'my_products' and request.user.is_authenticated:
         products = Product.objects.filter(user=request.user)
     elif request.path == '/json/':
+        # Public JSON endpoint - show all non-blacklisted products
         products = Product.objects.filter(is_blacklisted=False)
     else:
+        # API endpoint - show all non-blacklisted products for public
         products = Product.objects.filter(is_blacklisted=False)
     
     data = []
@@ -402,3 +410,76 @@ def logout_ajax(request):
         'status': 'success',
         'message': 'Logged out successfully!'
     })
+
+@csrf_exempt
+@require_POST
+def create_product_flutter(request):
+    try:
+        data = json.loads(request.body)
+        
+        # Get user from request
+        user = request.user if request.user.is_authenticated else None
+        
+        product = Product.objects.create(
+            user=user,
+            name=data.get('name'),
+            price=data.get('price'),
+            description=data.get('description'),
+            category=data.get('category'),
+            thumbnail=data.get('thumbnail', ''),
+            is_featured=data.get('is_featured', False),
+        )
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Product created successfully!',
+            'product': {
+                'id': product.id,
+                'name': product.name,
+                'price': str(product.price),
+            }
+        }, status=201)
+        
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=400)
+
+@csrf_exempt
+def image_proxy(request):
+    """
+    Proxy endpoint to fetch images from external URLs.
+    This helps avoid CORS issues when loading images in Flutter apps.
+    """
+    import urllib.request
+    from urllib.parse import unquote
+    
+    image_url = request.GET.get('url')
+    
+    if not image_url:
+        return JsonResponse({'error': 'No URL provided'}, status=400)
+    
+    try:
+        # Decode the URL if it's encoded
+        image_url = unquote(image_url)
+        
+        # Fetch the image from the external URL
+        req = urllib.request.Request(
+            image_url,
+            headers={
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            }
+        )
+        
+        with urllib.request.urlopen(req, timeout=10) as response:
+            image_data = response.read()
+            content_type = response.headers.get('Content-Type', 'image/jpeg')
+            
+            return HttpResponse(image_data, content_type=content_type)
+            
+    except Exception as e:
+        return JsonResponse({
+            'error': 'Failed to fetch image',
+            'message': str(e)
+        }, status=400)
